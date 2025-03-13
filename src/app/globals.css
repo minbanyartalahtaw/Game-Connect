@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  h1 {
+    font-family: "Inter", sans-serif;
   }
-}
+  button.btn {
+    font-family: monospace;
+    font-family: var(--font-geist-sans);
+    background-color: rgb(229, 229, 229);
+    color: black;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  button.btn:hover {
+    background-color: #cbcbcb;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  button.btn:active {
+    transform: scale(0.95);
+  }
 }
