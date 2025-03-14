@@ -6,8 +6,7 @@ import Matter from "matter-js";
 interface FallingTextProps {
   text: string;
   highlightWords: string[];
-  highlightClass?: string; // Made optional since unused
-  trigger: "auto" | "click" | "hover" | "scroll"; // Added specific types
+  trigger: "auto" | "click" | "hover" | "scroll";
   backgroundColor: string;
   wireframes?: boolean;
   gravity?: number;
@@ -23,7 +22,6 @@ const FallingText: React.FC<FallingTextProps> = ({
   wireframes = false,
   gravity = 1,
   mouseConstraintStiffness = 0.2,
-  fontSize = "1rem",
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -236,17 +234,19 @@ const FallingText: React.FC<FallingTextProps> = ({
   return (
     <div
       ref={containerRef}
-      className="relative z-[1] w-[90%] h-[300px] md:h-[400px] cursor-pointer text-center pt-8 overflow-hidden border-b-2 border-white"
+      className="relative z-[1] w-[90%] h-[300px] md:h-[400px] cursor-pointer text-center pt-8 overflow-hidden border-b-2 border-white mt-10"
       onClick={trigger === "click" ? handleTrigger : undefined}
       onMouseOver={trigger === "hover" ? handleTrigger : undefined}>
       <div
         ref={textRef}
-        className="inline-block"
-        style={{
-          fontSize,
-          lineHeight: 1.4,
-        }}
+        className="inline-block text-2xl md:text-4xl lg:text-[2rem]"
       />
+
+      <div className="absolute w-full flex justify-center mt-8 md:bottom-40 bottom-20">
+        <button className="btn font-bold text-xl sm:text-2xl px-6 sm:px-9 py-2 sm:py-3 z-10">
+          Explore More
+        </button>
+      </div>
 
       <div className="absolute top-0 left-0 z-0" ref={canvasContainerRef} />
     </div>

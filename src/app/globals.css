@@ -1,27 +1,30 @@
 @import "tailwindcss";
 
 @layer base {
-  h1 {
-    font-family: "Inter", sans-serif;
-  }
-  button.btn {
-    font-family: monospace;
-    font-family: var(--font-geist-sans);
-    background-color: rgb(229, 229, 229);
-    color: black;
-    padding: 0.5rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0.25rem;
+}
+
+@layer components {
+  .btn {
     cursor: pointer;
+    background-color: #000;
+    color: white;
+    font-size: 1rem;
+    padding: 0.44rem 1.2rem;
+    border-radius: 0.25rem;
     transition: all 0.2s ease;
-    font-weight: 500;
+    border: 2px solid #434343;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
-  button.btn:hover {
-    background-color: #cbcbcb;
-    border-color: rgba(255, 255, 255, 0.3);
+  .btn:hover {
+    background-color: #111;
+    border-color: #444;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  button.btn:active {
-    transform: scale(0.95);
+
+  .btn:active {
+    transform: scale(0.98);
+    box-shadow: none;
   }
 }
