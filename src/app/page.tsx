@@ -15,12 +15,12 @@ export default function Home() {
       </button>
       <TrueFocus sentence="Game Connect" />
       <FallingText
-        text={`Share and Connect with your friends. Create and share your favorite games with Game-Connect.`}
+        text={`Share and Connect with your friends. Create and share your favorite games ID with Game-Connect.`}
         highlightWords={[
           "Share",
           "Connect",
           "Favorite",
-          "Create",
+          "ID",
           "friends",
           "Game-Connect",
         ]}

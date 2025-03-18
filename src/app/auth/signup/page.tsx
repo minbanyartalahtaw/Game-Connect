@@ -1,14 +1,21 @@
 "use client";
 
 import { useState } from "react";
-
 import Link from "next/link";
 import SnackBar from "@/app/components/snackBar";
+import JellyLoader from "@/app/components/loading";
+import { signup } from "./action";
+import CountingLoader from "@/app/components/counterLoader";
+import { useRouter } from "next/navigation";
+
 
 export default function SignUp() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [counterLoader, setCounterLoader] = useState(false);
   const [snackBar, setSnackBar] = useState({
     message: "",
     isOpen: false,
@@ -25,37 +32,84 @@ export default function SignUp() {
     }, 3000);
   };
 
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
-  // const [isLoading, setIsLoading] = useState(false);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSignup();
+    }
+  };
+
+const randomNumber = Math.floor(Math.random() * 9) + 1;
+
+  // handleSignup
   const handleSignup = async () => {
-    console.log("Top Line");
-    if (!isValidEmail(email)) {
+    // check if email is valid format
+    if (!validateEmail(email)) {
       setSnackBar({
-        message: "Please enter a valid email.",
+        message: "Please enter a valid email address",
         isOpen: true,
         type: "error",
       });
-      closeSnackBar();
+      setTimeout(() => {
+        closeSnackBar();
+      }, 3000);
       return;
     }
-
-    if (username === "banyar") {
+    // check if password is at least 8 characters long
+    if (password.length < 8) {
       setSnackBar({
-        message: "Username already taken!",
+        message: "Password must be 8+ chars.",
         isOpen: true,
-        type: "warning",
+        type: "error",
       });
-      closeSnackBar();
+      setTimeout(() => {
+        closeSnackBar();
+      }, 3000);
       return;
     }
-
-    console.log(email, password, username);
+    setLoading(true);
+    const response = await signup(displayName, email, password, randomNumber);
+    // check if response is successful or not
+    if (response.error) {
+      setSnackBar({
+        message: response.error,
+        isOpen: true,
+        type: "error",
+      });
+      setLoading(false);
+      setTimeout(() => {
+        closeSnackBar();
+      }, 3000);
+      return;
+    } 
+    // If successful, set Cookie
+    setCounterLoader(true);
+    setTimeout(() => {
+      setCounterLoader(false);
+    }, 3000);
+    setLoading(false);
+    router.push("/user");
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen w-full relative">
+      
+      {/* Counter Loader */}
+      {counterLoader && <CountingLoader />}
+
+      {/* Loading */}
+      {loading && (
+        <div className="fixed flex flex-col gap-4 inset-0 items-center justify-center bg-black/50 z-50">
+          <JellyLoader size={100} color="white" />
+          <h1 className="text-white text-2xl font-bold">Loading...</h1>
+        </div>
+      )}
+
+      {/* Back Button */}
       <div className="absolute top-6 left-6 z-10 flex items-center">
         <Link
           href="/"
@@ -75,6 +129,7 @@ export default function SignUp() {
         </Link>
       </div>
 
+      {/* Sign Up Form */}
       <div
         className="w-full max-w-md px-10 py-12 z-10 mx-4 rounded-2xl border-5 border-white/10 shadow-xl shadow-cyan-500/5"
         style={{
@@ -93,13 +148,14 @@ export default function SignUp() {
         <div className="space-y-1">
           <div className="relative group">
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="displayName"
+              type="displayName"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
               required
               className="mt-3 w-full px-4 py-3 bg-black/20 border-5 border-white/10 rounded-lg focus:outline-none transition-all duration-300 text-white placeholder:text-white/30"
-              placeholder="Email"
+              placeholder="Display Name"
+              onKeyDown={handleKeyPress}
             />
           </div>
         </div>
@@ -108,12 +164,13 @@ export default function SignUp() {
           <div className="relative group">
             <input
               id="email"
-              type="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="mt-3 w-full px-4 py-3 bg-black/20 border-5 border-white/10 rounded-lg focus:outline-none transition-all duration-300 text-white placeholder:text-white/30"
-              placeholder="username"
+              placeholder="Email"
+              onKeyDown={handleKeyPress}
             />
           </div>
         </div>
@@ -128,6 +185,7 @@ export default function SignUp() {
               required
               className="my-3 w-full px-4 py-3 bg-black/20 border-5 border-white/10 rounded-lg focus:outline-none transition-all duration-300 text-white placeholder:text-white/30"
               placeholder="passw0rd"
+              onKeyDown={handleKeyPress}
             />
           </div>
         </div>
@@ -135,7 +193,7 @@ export default function SignUp() {
         <button
           className="btn w-full mt-8"
           onClick={handleSignup}
-          disabled={email === "" || password === "" || username === ""}>
+          disabled={email === "" || password === "" || displayName === ""}>
           Sign Up
         </button>
         <div className="mt-10 text-center text-sm">
@@ -147,6 +205,7 @@ export default function SignUp() {
               Sign in
             </Link>
           </p>
+          ß{" "}
         </div>
       </div>
 
@@ -157,4 +216,6 @@ export default function SignUp() {
       />
     </div>
   );
+
+
 }

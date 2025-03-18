@@ -1,50 +1,81 @@
 "use client";
 
 import { useState } from "react";
-import Loading from "@/app/components/loading";
-
+import JellyLoader from "@/app/components/loading";
 import Link from "next/link";
 import SnackBar from "@/app/components/snackBar";
+import { login } from "./action";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [openSnackBar, setOpenSnackBar] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState("");
-  const [snackBarType, setSnackBarType] = useState<"success" | "error">(
-    "success"
-  );
-  const handleSignIn = async () => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    if (email === "admin") {
-      setSnackBarMessage("Login Success");
-      setOpenSnackBar(true);
-    } else {
-      setSnackBarMessage("Not Found User");
-      setSnackBarType("error");
-      setOpenSnackBar(true);
-    }
+  const [loading, setLoading] = useState(false);
+  const [snackBar, setSnackBar] = useState({
+    message: "",
+    isOpen: false,
+    type: "error",
+  });
+
+  const closeSnackBar = () => {
+    setTimeout(() => {
+      setSnackBar({
+        message: "",
+        isOpen: false,
+        type: "error",
+      });
+    }, 3000);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen w-full relative ">
-        <Loading />
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-        <h4 className="text-white text-2xl font-bold mt-7">Loading...</h4>
-      </div>
-    );
-  }
+  // handleSignIn
+  const handleSignIn = async () => {
+    // Check if email is valid f:28
+    if (!validateEmail(email)) {
+      setSnackBar({
+        message: "Please enter a valid email.",
+        isOpen: true,
+        type: "error",
+      });
+      closeSnackBar();
+      return;
+    }
+    // Login Method
+    setLoading(true);
+
+    // Check Backend for login f:8
+    const response = await login(email, password);
+    // Destructure response {staus : boolean, message : string}
+    const { status, message } = response;
+    if (!status) {
+      setSnackBar({ message: message, isOpen: true, type: "error" });
+      closeSnackBar();
+      setLoading(false);
+      return;
+    }
+    // if status is true backend will set Cookie b:30 and redirect to /user
+    router.push("/user");
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen w-full relative ">
+      {/* Loading */}
+      {loading && (
+        <div className="fixed flex flex-col gap-4 inset-0 items-center justify-center bg-black/50 z-50">
+          <JellyLoader size={100} color="white" />
+          <h1 className="text-white text-2xl font-bold">Loading...</h1>
+        </div>
+      )}
       <div className="absolute top-6 left-6 z-10 flex items-center">
         <Link
           href="/"
-          className="text-white hover:text-cyan-400 transition-colors flex items-center gap-2 border-2 border-white/50 rounded-full p-2">
+          className="text-white hover:text-cyan-400 transition-colors flex items-center gap-2 border-2 border-white/50 rounded-full p-2"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -54,7 +85,8 @@ export default function Login() {
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
-            strokeLinejoin="round">
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </Link>
@@ -68,7 +100,8 @@ export default function Login() {
           boxShadow:
             "inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4)",
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.05' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")`,
-        }}>
+        }}
+      >
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-0.5 bg-gradient-to-r from-cyan-500/0 via-cyan-500 to-cyan-500/0 blur-sm"></div>
 
         <h1 className="text-2xl font-bold text-white text-center animate-fadeIn">
@@ -82,7 +115,7 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="mt-3 w-full px-4 py-3 bg-black/20 border-3 border-white/20 rounded-lg focus:outline-none transition-all duration-300 text-white placeholder:text-white/30"
-            placeholder="Email or Username"
+            placeholder="Email"
           />
         </div>
 
@@ -102,7 +135,8 @@ export default function Login() {
           type="submit"
           disabled={email === "" || password === ""}
           className="btn w-full mt-8 bg-cyan-700 hover:bg-cyan-600"
-          onClick={handleSignIn}>
+          onClick={handleSignIn}
+        >
           Sign In
         </button>
 
@@ -111,7 +145,8 @@ export default function Login() {
             Don&apos;t have an account?{" "}
             <Link
               href="/auth/signup"
-              className="text-cyan-400 hover:text-cyan-300 border-b border-cyan-400/30 hover:border-cyan-300 transition-colors">
+              className="text-cyan-400 hover:text-cyan-300 border-b border-cyan-400/30 hover:border-cyan-300 transition-colors"
+            >
               Sign up
             </Link>
           </p>
@@ -119,9 +154,9 @@ export default function Login() {
       </div>
 
       <SnackBar
-        message={snackBarMessage}
-        isOpen={openSnackBar}
-        type={snackBarType}
+        message={snackBar.message}
+        isOpen={snackBar.isOpen}
+        type={snackBar.type as "error" | "success" | "info" | "warning"}
       />
     </div>
   );
